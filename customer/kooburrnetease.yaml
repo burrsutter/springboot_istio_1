@@ -1,0 +1,51 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: customer
+  name: customer
+spec:
+  ports:
+  - name: customer-8080
+    port: 8080
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: customer
+  type: LoadBalancer
+status:
+  loadBalancer: {}
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: customer
+  name: customer
+spec:
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: customer
+      name: customer
+    spec:
+      containers:
+      - image: istiodemo/customer:0.0.1-SNAPSHOT
+        livenessProbe:
+          exec:
+            command:
+            - curl
+            - localhost:8080/health
+        name: customer
+        readinessProbe:
+          exec:
+            command:
+            - curl
+            - localhost:8080/health
+        resources: {}
+status: {}
