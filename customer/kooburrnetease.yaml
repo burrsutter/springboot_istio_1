@@ -8,10 +8,10 @@ metadata:
   name: customer
 spec:
   ports:
-  - name: customer-8080
-    port: 8080
+  - name: customer-80
+    port: 80
     protocol: TCP
-    targetPort: 80
+    targetPort: 8080
   selector:
     app: customer
   type: LoadBalancer
