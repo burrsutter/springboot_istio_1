@@ -28,18 +28,39 @@ devtools
 
 12. curl $(minishift ip):8080
 
-13. kubectl run customer --image=istiodemo/customer:0.0.1-SNAPSHOT -l app=customer --dry-run=true -o json > kubernetes.yml
+13. kubectl run customer --image=istiodemo/customer:0.0.1-SNAPSHOT -l app=customer --dry-run=true --expose=true --port=8080 -o yaml  > kubernetes.yaml
 
 14. Add istioctl to your PATH
 
-15. oc apply -f <(istioctl kube-inject -f kubernetes.yml) -n springistio
+15. oc apply -f <(istioctl kube-inject -f kubernetes.yaml) -n springistio
 
-16. oc expose deployment customer --port=8080
+16. oc expose service customer
 
-17. oc expose service customer
+17. oc get route
 
-18. oc get route
+18. curl customer-springistio.$(minishift ip).nip.io
 
-19. curl customer-springistio.$(minishift ip).nip.io
+19. Check out your Grafana, Jaeger and Service Graph dashboards
 
-20. Check out your Grafana, Jaeger and Service Graph dashboards
+
+# Advanced
+
+### Memory limits
+
+If you want to tweak the limits of the container you can explicit declare it in the `kubectl run` command
+
+Example:
+
+    kubectl run customer --image=istiodemo/customer:0.0.1-SNAPSHOT -l app=customer --dry-run=true --expose=true --port=8080 -o yaml --limits='cpu=200m,memory=512Mi' > kubernetes.yaml
+    
+
+
+### Logs
+
+As the Pod contains two containers (application + istio-proxy), to verify the log you should specify the desired container using the `-c` switch.
+
+Examples:
+
+    $ oc logs customer-442664287-xd5wh -c istio-proxy
+    $ oc logs customer-442664287-xd5wh -c customer
+    
