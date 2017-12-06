@@ -52,35 +52,33 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
-		
-        <plugin>
-          <groupId>io.fabric8</groupId>
-          <artifactId>docker-maven-plugin</artifactId>
-          <version>${docker-maven-plugin.version}</version>
-          <executions>
-            <execution>
-              <phase>install</phase>
-              <goals>
-                <goal>build</goal>
-              </goals>
-              <configuration>
-                <images>
-                  <image>
-                    <name>istiodemo/%a:%v</name>
-                    <build>
-                      <from>${docker.image}</from>
-                      <assembly>
-                        <descriptorRef>artifact</descriptorRef>
-                        <targetDir>/deployments</targetDir>
-                      </assembly>
-                    </build>
-                  </image>
-                </images>
-              </configuration>
-            </execution>
-          </executions>
-
-        </plugin>
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <version>${docker-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <phase>install</phase>
+            <goals>
+              <goal>build</goal>
+            </goals>
+            <configuration>
+              <images>
+                <image>
+                  <name>istiodemo/%a:%v</name>
+                  <build>
+                    <from>${docker.image}</from>
+                    <assembly>
+                      <descriptorRef>artifact</descriptorRef>
+                      <targetDir>/deployments</targetDir>
+                    </assembly>
+                  </build>
+                </image>
+              </images>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 		</plugins>
 	</build>
 

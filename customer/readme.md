@@ -10,56 +10,59 @@ devtools
 
 3. mvn spring-boot:run and test it localhost:8080
 
-add fabric8/deployment.yml
-because you need to override the default live & ready probes otherwise you get:
-[customer-2691584122-cs8rz istio-proxy] [2017-11-17 00:35:15.001][12][warning][upstream] external/envoy/source/server/lds_subscription.cc:65] lds: fetch failure: error adding listener: 'http_172.17.0.20_8080' has duplicate address '172.17.0.20:8080' as existing listener 
+4. eval $(minishift oc-env)
 
-https://github.com/istio/istio/issues/1194
+5. eval $(minishift docker-env)
 
-should look like
-```
-        livenessProbe:
-          exec:
-            command: 
-            - curl
-            - localhost:8080/health
-```
-see the one in this project
+6. oc login -u admin -p admin
 
-4. minishift oc-env
+7. oc new-project springistio
 
-5. oc login
-
-6. oc new-project springistio
-
-7. oc adm policy add-scc-to-user privileged -z default -n springistio
-
-8. minishift docker-env
+8. oc adm policy add-scc-to-user privileged -z default -n springistio
 
 9. mvn install
 
-10.  docker images | grep istiodemo
+10. docker images | grep istiodemo
 
 11. docker run -it -p 8080:8080 istiodemo/customer:0.0.1-SNAPSHOT
 
 12. curl $(minishift ip):8080
 
-13. Download kedge 
+13. oc run customer --generator=deployment/v1beta1 --image=istiodemo/customer:0.0.1-SNAPSHOT -l app=customer --dry-run=true --expose=true --port=8080 -o yaml  > kubernetes.yaml
 
-curl -L https://github.com/kedgeproject/kedge/releases/download/v0.5.0/kedge-darwin-amd64 -o kedge
+14. Add istioctl to your PATH
 
-chmod +x kedge
+15. oc apply -f <(istioctl kube-inject -f kubernetes.yaml) -n springistio
 
-14. kedge generate -f  src/main/kedge/kedgefile.yaml > kooburrnetease.yaml
-
-15. Add istioctl to your PATH
-
-16. oc apply -f <(istioctl kube-inject -f kooburrnetease.yaml) -n springistio
+16. oc set probe deployment customer --readiness --get-url=http://:8080/health
 
 17. oc expose service customer
 
 18. oc get route
 
-19. curl customer-springistio.192.168.99.102.nip.io
+19. curl customer-springistio.$(minishift ip).nip.io
 
 20. Check out your Grafana, Jaeger and Service Graph dashboards
+
+
+# Advanced
+
+### Memory limits
+
+If you want to tweak the limits of the container you can explicit declare it in the `kubectl run` command
+
+Example:
+
+    kubectl run customer --image=istiodemo/customer:0.0.1-SNAPSHOT -l app=customer --dry-run=true --expose=true --port=8080 -o yaml --limits='cpu=200m,memory=512Mi' > kubernetes.yaml
+    
+
+
+### Logs
+
+As the Pod contains two containers (application + istio-proxy), to verify the log you should specify the desired container using the `-c` switch.
+
+Examples:
+
+    $ oc logs customer-442664287-xd5wh -c istio-proxy
+    $ oc logs customer-442664287-xd5wh -c customer
+    

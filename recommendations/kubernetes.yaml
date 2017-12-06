@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: recommendations
+  name: recommendations
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: recommendations
+status:
+  loadBalancer: {}
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: recommendations
+  name: recommendations
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: recommendations
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: recommendations
+    spec:
+      containers:
+      - image: istiodemo/recommendations:0.0.1-SNAPSHOT
+        name: recommendations
+        ports:
+        - containerPort: 8080
+        resources: {}
+status: {}
