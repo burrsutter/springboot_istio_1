@@ -12,35 +12,37 @@ devtools
 
 4. eval $(minishift oc-env)
 
-5. oc login
+5. eval $(minishift docker-env)
 
-6. oc new-project springistio
+6. oc login -u admin -p admin
 
-7. oc adm policy add-scc-to-user privileged -z default -n springistio
+7. oc new-project springistio
 
-8. eval $(minishift docker-env)
+8. oc adm policy add-scc-to-user privileged -z default -n springistio
 
 9. mvn install
 
-10.  docker images | grep istiodemo
+10. docker images | grep istiodemo
 
 11. docker run -it -p 8080:8080 istiodemo/customer:0.0.1-SNAPSHOT
 
 12. curl $(minishift ip):8080
 
-13. kubectl run customer --image=istiodemo/customer:0.0.1-SNAPSHOT -l app=customer --dry-run=true --expose=true --port=8080 -o yaml  > kubernetes.yaml
+13. oc run customer --generator=deployment/v1beta1 --image=istiodemo/customer:0.0.1-SNAPSHOT -l app=customer --dry-run=true --expose=true --port=8080 -o yaml  > kubernetes.yaml
 
 14. Add istioctl to your PATH
 
 15. oc apply -f <(istioctl kube-inject -f kubernetes.yaml) -n springistio
 
-16. oc expose service customer
+16. oc set probe deployment customer --readiness --get-url=http://:8080/health
 
-17. oc get route
+17. oc expose service customer
 
-18. curl customer-springistio.$(minishift ip).nip.io
+18. oc get route
 
-19. Check out your Grafana, Jaeger and Service Graph dashboards
+19. curl customer-springistio.$(minishift ip).nip.io
+
+20. Check out your Grafana, Jaeger and Service Graph dashboards
 
 
 # Advanced

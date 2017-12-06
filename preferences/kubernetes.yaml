@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: preferences
+  name: preferences
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: preferences
+status:
+  loadBalancer: {}
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: preferences
+  name: preferences
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: preferences
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: preferences
+    spec:
+      containers:
+      - image: istiodemo/preferences:0.0.1-SNAPSHOT
+        name: preferences
+        ports:
+        - containerPort: 8080
+        resources: {}
+status: {}
